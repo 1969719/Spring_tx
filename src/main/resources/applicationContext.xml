@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd
+    http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+        <property name="driverClass" value="${jdbc.driverClassName}"/>
+        <property name="jdbcUrl" value="${jdbc.url}"/>
+        <property name="user" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <property name="maxPoolSize" value="${jdbc.maxPoolSize}"/>
+        <property name="minPoolSize" value="${jdbc.minPoolSize}"/>
+        <property name="maxStatements" value="${jdbc.maxStatements}"/>
+        <property name="maxIdleTime" value="${jdbc.maxIdleTime}"/>
+    </bean>
+
+    <context:property-placeholder location="jdbc.properties"/>
+<!--开启Spring包的扫描-->
+    <context:component-scan base-package="org.lanqiao.tx"></context:component-scan>
+    <!-- 开启Spring的事务管理器 -->
+    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <!--开启Spring注解管理事务的驱动-->
+    <tx:annotation-driven transaction-manager="txManager" proxy-target-class="true"/>
+    <!--&lt;!&ndash;配置事务通知&ndash;&gt;-->
+    <!--<tx:advice id="txAdvice" transaction-manager="txManager">-->
+        <!--&lt;!&ndash; the transactional semantics... &ndash;&gt;-->
+        <!--<tx:attributes>-->
+            <!--&lt;!&ndash; all methods starting with 'get' are read-only &ndash;&gt;-->
+            <!--<tx:method name="get*" propagation="SUPPORTS" read-only="true"/>-->
+            <!--&lt;!&ndash; other methods use the default transaction settings (see below) &ndash;&gt;-->
+            <!--<tx:method name="set*" propagation="REQUIRED"/>-->
+            <!--<tx:method name="pay" propagation="REQUIRED" rollback-for="PayException"/>-->
+        <!--</tx:attributes>-->
+    <!--</tx:advice>-->
+    <!--&lt;!&ndash;配置顾问&ndash;&gt;-->
+    <!--<aop:config proxy-target-class="true">-->
+        <!--<aop:pointcut id="personalPay" expression="execution(* org.lanqiao.tx.Service.PersonalService.*(..))"/>-->
+        <!--<aop:advisor advice-ref="txAdvice" pointcut-ref="personalPay"/>-->
+    <!--</aop:config>-->
+</beans>
